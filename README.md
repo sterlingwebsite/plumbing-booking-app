@@ -40,11 +40,9 @@ A full-stack booking system built with Flask, SQLite, and vanilla JavaScript. De
 
 1\. Clone the repo:
 
-&nbsp;  ```bash
+   ```bash
 
-&nbsp;  git clone https://github.com/your-username/plumbing-booking-app.git
+git clone https://github.com/sterlingwebsite/plumbing-booking-app.git
 
-&nbsp;  cd plumbing-booking-app
-
-
+   cd plumbing-booking-app
 
