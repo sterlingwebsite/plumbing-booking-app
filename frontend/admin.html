@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard – Sterling's Plumbing</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Service Bookings</h1>
+
+  <table id="bookingsTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Service</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    async function loadBookings() {
+      try {
+        const response = await fetch('http://localhost:5000/bookings');
+        const bookings = await response.json();
+        const tbody = document.querySelector('#bookingsTable tbody');
+
+        bookings.forEach(booking => {
+          const row = document.createElement('tr');
+          if (booking.status === 'completed') {
+            row.classList.add('completed');
+          }
+
+          row.innerHTML = `
+            <td>${booking.name}</td>
+            <td>${booking.email}</td>
+            <td>${booking.service}</td>
+            <td>${booking.date}</td>
+            <td class="status-${booking.status}">${booking.status}</td>
+            <td>
+              ${booking.status === 'pending' ? `<button onclick="markCompleted(${booking.id})">Mark Completed</button>` : ''}
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Error loading bookings:', error);
+        showToast("Failed to load bookings ❌", "error");
+      }
+    }
+
+    async function markCompleted(id) {
+      const confirmed = confirm("Mark this booking as completed?");
+      if (!confirmed) return;
+
+      try {
+        await fetch(`http://localhost:5000/complete/${id}`, { method: 'POST' });
+
+        const row = document.querySelector(`button[onclick="markCompleted(${id})"]`)?.closest('tr');
+        if (row) {
+          row.classList.add('completed');
+          row.querySelector('td:nth-child(5)').textContent = 'completed';
+          row.querySelector('td:nth-child(5)').className = 'status-completed';
+          row.querySelector('td:nth-child(6)').innerHTML = '';
+        }
+
+        showToast("Booking marked as completed ✅", "success");
+      } catch (error) {
+        console.error('Error marking booking as completed:', error);
+        showToast("Something went wrong ❌", "error");
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast show ${type}`;
+
+      setTimeout(() => {
+        toast.className = 'toast'; // Reset
+      }, 3000);
+    }
+
+    loadBookings();
+  </script>
+</body>
+</html>
